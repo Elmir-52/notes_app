@@ -1,0 +1,49 @@
+.account-section {
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.account-section__h2 {
+    font-size: 3rem;
+    width: 100%;
+    font-weight: 400;
+    text-align: center;
+    margin-top: 6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-section__paragraph {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-top: 3.5rem;
+}
+
+.account-section__wrapper-button {
+    text-align: center;
+    margin-top: 4rem;
+}
+
+@media (max-width: 1200px) {
+    .account-section {
+        width: 700px;
+    }
+
+    .account-section__wrapper-button {
+        width: 40%;
+        margin: 0 auto;
+        margin-top: 3.5rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .account-section {
+        width: 380px;
+    }
+
+    .account-section__wrapper-button {
+        width: 70%;
+        margin: 0 auto;
+        margin-top: 3.5rem;
+    }
+}
