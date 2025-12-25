@@ -1,29 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState  } from "react";
 import ButtonNote from "../ButtonNote/ButtonNote";
 import ButtonNoteAdd from "../ButtonNoteAdd/ButtonNoteAdd";
 import './HomeSection.css';
 import Modal from "../Modal/Modal";
 import { getDb } from "../../fetchRequestDB";
-import type { NoteDb, UnCleanNoteDb } from "../../App";
+import type { NoteDb } from "../../App";
+import { equalTo, orderByChild, query, ref, type DatabaseReference, type Query } from "firebase/database";
+import { db } from "../../../lib/fierbase";
 
 export default function HomeSection() {
     const [modal, setModal] = useState<boolean>(false);
-    const [result, setResult] = useState<NoteDb[]>([{objectId: '', user_id: '', title: '', content: '', date: ''}]);
+    const [result, setResult] = useState<NoteDb[] | undefined>();
 
     const cookieFull: string = document.cookie;
     const cookieArr: string[] = cookieFull.split(';');
     const cookieUserId: string = cookieArr[0].split('=')[1];
 
-    useEffect(() => {
-        getDb<UnCleanNoteDb>(`https://parseapi.back4app.com/classes/notes?where={"user_id":"${cookieUserId}"}`)
-            .then(data => setResult(data))
-    }, [modal]);
+    const notesRef: DatabaseReference = ref(db, '/notes');
+    const notesQuery: Query = query(
+        notesRef,
+        orderByChild('user_id'),
+        equalTo(cookieUserId)
+    )
 
+    console.log(result, 'resExam');
+
+    useEffect(() => {
+        getDb<NoteDb>(notesQuery)
+            .then((data: NoteDb[] | undefined) => { setResult(data) })
+            
+    }, [modal]);
+        
     return (
         <section className="home-section">
+
             {
-                result.map(el => {
-                    return <ButtonNote key={el.objectId} content={el}></ButtonNote>
+                result?.map(el => {
+                    return <ButtonNote key={el.note_id} content={el}></ButtonNote>
                 })
             }
 

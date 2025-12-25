@@ -6,47 +6,61 @@ import './AuthorizationSection.css'
 import { getDb } from "../../fetchRequestDB";
 import openEyeImage from '/openeye.svg';
 import closeEyeImage from '/closeeye.svg';
+import { equalTo, orderByChild, query, ref, type DatabaseReference, type Query } from "firebase/database";
+import { db } from "../../../lib/fierbase";
 
 export default function AuthorizationSection() {
-    const [user, setUser] = useState<UserDb>({ objectId: '', name: '', password: '' })
+    const [user, setUser] = useState<UserDb>({ user_id: '', name: '', password: '' })
     const [openEye, setOpenEye] = useState<boolean>(false);
     const context: ContextInterface = useContext(NotesContext);
 
-    function changeUser(event: React.ChangeEvent<HTMLInputElement>, property: string) {
-        if (property === 'name') {
-            setUser(prev => {
+    const usersRef: DatabaseReference = ref(db, '/users');
+    const userQuery: Query = query(
+            usersRef,
+            orderByChild('name'),
+            equalTo(user.name)
+        )
+
+    function authorizationUser(): void {
+        if(user.name && user.password) {
+
+            getDb<UserDb>(userQuery)
+                .then((data: UserDb[] | undefined) => {
+
+                    if (data && data?.length === 0) {
+                        alert('Возможно вы не зарегистрировались на сайте');
+                    } else if (data && data[0].password === user.password) {
+                        const userFromDB: UserDb = data[0];
+                        document.cookie = `user_id=${userFromDB.user_id}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
+                        document.cookie = `user_name=${userFromDB.name}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
+                        context.setPage(Page.ACCOUNT);
+                    } else {
+                        alert('Возможно вы неправильно ввели пароль')
+                    }
+
+                })
+
+        } else {
+            alert('Введите имя и пароль');
+        }
+    }
+
+    function changeUser(event: React.ChangeEvent<HTMLInputElement>, property: string): void {
+        setUser((prev: UserDb) => {
+            if (property === 'name') {
                 return {
                     ...prev,
                     name: event.target.value
                 }
-            })
-        } else {
-            setUser(prev => {
+            } else if (property === 'password') {
                 return {
                     ...prev,
                     password: event.target.value
                 }
-            })
-        }
-    }
-
-    function authorizationUser() {
-        if(user.name && user.password) {
-            getDb(`https://parseapi.back4app.com/classes/users?where={"name":"${user.name}"}`)
-                .then(data => { 
-                    if (data[0].password === user.password) {
-                        document.cookie = `user_id=${data[0]?.objectId}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
-                        document.cookie = `user_name=${data[0]?.name}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
-                        setTimeout(() => context.setPage(Page.ACCOUNT), 1000);
-                        console.log(document.cookie);
-                    } else {
-                        alert('Возможно вы неправильно ввели пароль')
-                    }
-                })
-                .catch(() => {alert('Возможно вы неправильно ввели данные, либо у вас нет аккаунта')})
-        } else {
-            alert('Введите имя и пароль');
-        }
+            } else {
+                return prev;
+            }
+        });
     }
 
     return (

@@ -8,18 +8,8 @@ import './App.css';
 import AuthorizationSection from "./components/AuthorizationSection/AuthorizationSection";
 import AccountSection from "./components/AccountSection/AccountSection";
 
-export interface NoteDb {
-    objectId: string, 
-    user_id: string,
-    title: string, 
-    content: string,
-    date: string
-}
-
-export interface UnCleanNoteDb {
-    objectId: string, 
-    createdAt: string, 
-    updatedAt: string,
+export interface NoteDb { 
+    note_id: string,
     user_id: string,
     title: string, 
     content: string,
@@ -27,15 +17,7 @@ export interface UnCleanNoteDb {
 }
 
 export interface UserDb {
-    objectId: string,
-    name: string,
-    password: string,
-}
-
-export interface UnCleanUserDb {
-    objectId: string, 
-    createdAt: string,
-    updatedAt: string,
+    user_id: string,
     name: string,
     password: string,
 }
@@ -48,7 +30,7 @@ export default function App() {
     <>
       <Header setPage={setPage}></Header>
       <main>
-        <NotesConstext.Provider value={{setPage: (page: AllPage) => setPage(page), noteId: noteId, setNoteId: (id: string) => setNoteId(id)}}>
+        <NotesConstext.Provider value={ { setPage: (page: AllPage) => setPage(page), noteId: noteId, setNoteId: (id: string) => setNoteId(id) } }>
 
             {page === Page.HOME ? <HomeSection></HomeSection>
                   : undefined}

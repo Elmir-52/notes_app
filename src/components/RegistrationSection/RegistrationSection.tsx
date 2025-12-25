@@ -3,58 +3,65 @@ import NotesContext, { Page, type ContextInterface } from "../../NotesContext";
 import ButtonNavigation from "../Button/ButtonNavigation";
 import type { UserDb } from "../../App";
 import './RegistrationSection.css'
-import { getDb, postDb } from "../../fetchRequestDB";
+import { getDb, setDb } from "../../fetchRequestDB";
 import openEyeImage from '/openeye.svg';
 import closeEyeImage from '/closeeye.svg';
+import { equalTo, orderByChild, query, ref, type DatabaseReference, type Query } from "firebase/database";
+import { db } from "../../../lib/fierbase";
 
 export default function RegistrationSection() {
-    const [user, setUser] = useState<UserDb>({ objectId: '', name: '', password: '' })
+    const [user, setUser] = useState<UserDb>({ user_id: crypto.randomUUID(), name: '', password: ''})
     const [openEye, setOpenEye] = useState<boolean>(false);
     const context: ContextInterface = useContext(NotesContext);
 
-    function changeUser(event: React.ChangeEvent<HTMLInputElement>, property: string) {
-        if (property === 'name') {
-            setUser(prev => {
+    const usersRef: DatabaseReference = ref(db, '/users');
+    const refToRequiredUser = ref(db, `/users/${user.user_id}`);
+    const userQuery: Query = query(
+        usersRef,
+        orderByChild('name'),
+        equalTo(user.name)
+    )
+
+    function registrationUser(): void {
+        if(user.name && user.password) {
+            
+            getDb<UserDb>(userQuery)
+                .then((data: UserDb[] | undefined) => {
+                    
+                    if (data?.length === 0) {
+                        setDb<UserDb>(refToRequiredUser, user)
+                            .then(() => { 
+                                document.cookie = `user_id=${user.user_id}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
+                                document.cookie = `user_name=${user.name}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
+                                context.setPage(Page.ACCOUNT);
+                            })
+                    } else {
+                        alert('Пользователь с таким именем уже есть');
+                    }
+
+                })
+                
+        } else {
+            alert('Введите имя и пароль');
+        }
+    }
+
+    function changeUser(event: React.ChangeEvent<HTMLInputElement>, property: string): void {
+        setUser((prev: UserDb) => {
+            if (property === 'name') {
                 return {
                     ...prev,
                     name: event.target.value
                 }
-            })
-        } else {
-            setUser(prev => {
+            } else if (property === 'password') {
                 return {
                     ...prev,
                     password: event.target.value
                 }
-            })
-        }
-    }
-
-    function registrationUser(): void {
-        if(user.name && user.password) {
-            getDb(`https://parseapi.back4app.com/classes/users?where={"name":"${user.name}"}`)
-                .then((data: UserDb[]) => {
-                    if (!(data[0].name === user.name)) {
-                        throw new Error('такого пользователя нет');
-                    } else {
-                        alert('Пользователь с таким именем уже есть');
-                    }
-                    console.log(data);
-
-                })
-                .catch(e => {
-                    postDb<UserDb>(`https://parseapi.back4app.com/classes/users`, user)
-                            .then(data => { 
-                                document.cookie = `user_id=${data?.objectId}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
-                                document.cookie = `user_name=${user.name}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
-                                setTimeout(() => context.setPage(Page.ACCOUNT), 1500);
-                                console.log(document.cookie);
-                            })
-                    console.log(e);
-                })
-        } else {
-            alert('Введите имя и пароль');
-        }
+            } else {
+                return prev;
+            }
+        });
     }
 
     return (

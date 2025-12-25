@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import './Modal.css'
-import { postDb } from "../../fetchRequestDB";
+import { setDb } from "../../fetchRequestDB";
 import type { NoteDb } from "../../App";
 import cross from '/cross.svg'
+import { ref, type DatabaseReference } from "firebase/database";
+import { db } from "../../../lib/fierbase";
 
 interface PropsModal {
     open: boolean,
@@ -26,16 +28,19 @@ export default function Modal({ open, onClick }: PropsModal) {
     }, [open]);
 
     const newDate = new Date();
-    const nowDate = `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`
+    const todayDate = `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`;
+
+    const newNoteId: string = crypto.randomUUID();
+    const newNoteRef: DatabaseReference = ref(db, `/notes/${newNoteId}`);
 
     function noteAdd() {
-        postDb<NoteDb>(`https://parseapi.back4app.com/classes/notes`, {objectId: '', user_id: cookieUserId, title: 'Новая заметка', content: '', date: nowDate});
+        setDb<NoteDb>(newNoteRef, {note_id: newNoteId, user_id: cookieUserId, title: 'Новая заметка', content: '', date: todayDate});
     }
 
     return (
         <dialog ref={dialog} className="modal">
-            <button onClick={() => onClick(false)} className="modal__cross-button"><img className="modal__cross-image" src={cross} alt="крестик" /></button>
-            <button onClick={() => {setTimeout(() => {onClick(false)}, 500); noteAdd()}} className="modal__button">Создать новую заметку</button>
+            <button onClick={ () => onClick(false) } className="modal__cross-button"><img className="modal__cross-image" src={cross} alt="крестик" /></button>
+            <button onClick={ () => { noteAdd(); onClick(false) } } className="modal__button">Создать новую заметку</button>
         </dialog>
     );
 }
