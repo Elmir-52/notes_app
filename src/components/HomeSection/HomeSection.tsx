@@ -23,8 +23,6 @@ export default function HomeSection() {
         equalTo(cookieUserId)
     )
 
-    console.log(result, 'resExam');
-
     useEffect(() => {
         getDb<NoteDb>(notesQuery)
             .then((data: NoteDb[] | undefined) => { setResult(data) })
