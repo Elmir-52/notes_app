@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import NotesContext, { Page, type ContextInterface } from "../../NotesContext";
-import ButtonNavigation from "../Button/ButtonNavigation";
+import Button from "../Button/Button";
 import type { UserDb } from "../../App";
 import './RegistrationSection.css'
 import { getDb, setDb } from "../../fetchRequestDB";
@@ -32,7 +32,6 @@ export default function RegistrationSection() {
                         setDb<UserDb>(refToRequiredUser, user)
                             .then(() => { 
                                 document.cookie = `user_id=${user.user_id}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
-                                document.cookie = `user_name=${user.name}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
                                 context.setPage(Page.ACCOUNT);
                             })
                     } else {
@@ -80,8 +79,8 @@ export default function RegistrationSection() {
 
             <div className="registration-section__wrapper-buttons">
                 <button className="registration-section__button" onClick={() => registrationUser() }>Зарегестрироваться</button>
-                <ButtonNavigation page={Page.AUTH}>Уже есть аккаунт</ButtonNavigation>
-                <ButtonNavigation page={Page.HOME}>На главную</ButtonNavigation>
+                <Button typeButton="navigation" page={Page.AUTH}>Уже есть аккаунт</Button>
+                <Button typeButton="navigation" page={Page.HOME}>На главную</Button>
             </div>
         </section>
     )

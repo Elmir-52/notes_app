@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import NotesContext, { Page, type ContextInterface } from "../../NotesContext";
-import ButtonNavigation from "../Button/ButtonNavigation";
+import Button from "../Button/Button";
 import type { UserDb } from "../../App";
 import './AuthorizationSection.css'
 import { getDb } from "../../fetchRequestDB";
@@ -16,10 +16,10 @@ export default function AuthorizationSection() {
 
     const usersRef: DatabaseReference = ref(db, '/users');
     const userQuery: Query = query(
-            usersRef,
-            orderByChild('name'),
-            equalTo(user.name)
-        )
+        usersRef,
+        orderByChild('name'),
+        equalTo(user.name)
+    )
 
     function authorizationUser(): void {
         if(user.name && user.password) {
@@ -32,7 +32,6 @@ export default function AuthorizationSection() {
                     } else if (data && data[0].password === user.password) {
                         const userFromDB: UserDb = data[0];
                         document.cookie = `user_id=${userFromDB.user_id}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
-                        document.cookie = `user_name=${userFromDB.name}; path=/; max-age=${(60 * 60 * 24 * 30) * 2}`;
                         context.setPage(Page.ACCOUNT);
                     } else {
                         alert('Возможно вы неправильно ввели пароль')
@@ -79,7 +78,7 @@ export default function AuthorizationSection() {
 
             <div className="authorization-section__wrapper-buttons">
                 <button className="authorization-section__button" onClick={ () => authorizationUser() }>Войти в аккаунт</button>
-                <ButtonNavigation page={Page.HOME}>На главную</ButtonNavigation>
+                <Button typeButton='navigation' page={Page.HOME}>На главную</Button>
             </div>
         </section>
     )
