@@ -24,6 +24,15 @@
     margin-top: 4rem;
 }
 
+.account-section__delete-button {
+    color: red;
+    text-decoration: underline;
+    font-size: 1.2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
 @media (max-width: 1200px) {
     .account-section {
         width: 700px;
